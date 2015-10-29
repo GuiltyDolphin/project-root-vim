@@ -109,6 +109,7 @@ function! s:ProjectRootInitialize()
   return 1
 endfunction
 
+
 " }}}
 
 " }}}
@@ -170,10 +171,10 @@ endfunction
 
 " }}}
 
-" Public {{{
+" Commands {{{
 
 " Attempts to run tests for the current project.
-function! ProjectRootTest()
+function! s:ProjectRootTest()
   if exists(s:ProjectTestCommandVariableName())
     exec '!cd ' . b:project_root_directory . ' && ' . s:ProjectTestCommand()
   else
@@ -181,8 +182,9 @@ function! ProjectRootTest()
   endif
 endfunction
 
+
 " Open a directory browser for the current project root directory.
-function! ProjectRootBrowseRoot()
+function! s:ProjectRootBrowseRoot()
   if exists(':NERDTreeToggle')
     exec 'NERDTreeToggle ' . b:project_root_directory
   elseif exists(':Sexplore')
@@ -192,11 +194,20 @@ function! ProjectRootBrowseRoot()
   endif
 endfunction
 
+function! s:ProjectRootInitCommands()
+  command! ProjectRootBrowseRoot :call <SID>ProjectRootBrowseRoot()
+  command! ProjectRootTest :call <SID>ProjectRootTest()
+endfunction
+
 " }}}
 
 " Initialize {{{
+
+call <SID>ProjectRootInitCommands()
+
 augroup ProjectRootInit
   au!
   au BufRead * call <SID>ProjectRootInitialize()
 augroup END
+
 " }}}
