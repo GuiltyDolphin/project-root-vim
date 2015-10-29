@@ -50,6 +50,21 @@ endfunction
 
 " }}}
 
+" Testing {{{
+
+" Generate the name of the variable that holds the test command
+" for the current project.
+function! s:ProjectTestCommandVariableName()
+  return "g:project_root_pt_{b:project_root_type}_test_command"
+endfunction
+
+" Get the test command for the current project type.
+function! s:ProjectTestCommand()
+  return g:project_root_pt_{b:project_root_type}_test_command
+endfunction
+
+" }}}
+
 " Setup {{{
 
 " Set the project root directory if it doesn't already exist for
@@ -163,6 +178,19 @@ function! s:GlobUpDir(pattern, start_directory)
 endfunction
 
 " }}}
+
+" }}}
+
+" Public {{{
+
+" Attempts to run tests for the current project.
+function! ProjectRootTest()
+  if exists(s:ProjectTestCommandVariableName())
+    exec '!cd ' . b:project_root_directory . ' && ' . s:ProjectTestCommand()
+  else
+    echo "No tests found"
+  endif
+endfunction
 
 " }}}
 
