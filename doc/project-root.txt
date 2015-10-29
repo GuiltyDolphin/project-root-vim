@@ -1,0 +1,108 @@
+*project-root.txt*   For Vim version 7.4
+
+Author: Ben Moon
+License: GNU General Public License version 3 (or later)
+
+=======================================================================
+CONTENTS                                        *project-root-contents*
+
+    1.Introduction......................|project-root|
+    2.Options...........................|project-root-options|
+    2.1.Glob matching...................|project-root-glob-matching|
+    2.2.Test command....................|project-root-test-command|
+    3.Commands..........................|project-root-commands|
+    4.About.............................|project-root-about|
+    5.License...........................|project-root-license|
+
+=======================================================================
+1. Introduction                                          *project-root*
+
+This plugin aims to make working with the root directory of projects
+easier.
+
+=======================================================================
+2. Options                                          *project-root-vars*
+
+The following options can be used to customize project-root's
+behaviour. They should be set in your .vimrc.
+
+|'loaded_project_root'|              Turns off the script.
+
+|'project_root_pt_unknown_globs'|    Glob patterns for matching unknown
+                                   project types.
+
+-----------------------------------------------------------------------
+                                                *'loaded_project_root'*
+
+To prevent this plugin from loading, put the following in your .vimrc: >
+    let loaded_project_root = 1
+<
+-----------------------------------------------------------------------
+                                      *'project_root_pt_unknown_globs'*
+Values: A list of glob pattern strings.
+Default: [".git", "LICEN{S,C}E", "README*"]
+
+If there are no globs set for the current project type, the current
+project globs fail to complete or no project type can be ascertained,
+then the value of this option will be used to determine the current
+project directory root.
+
+-----------------------------------------------------------------------
+2.1. Glob matching                         *project-root-glob-matching*
+
+To add smart project matching for a particular project type, set a
+variable of the form: >
+    project_root_pt_{project_type}_globs
+To a list of glob patterns. This will enable project-root to better >
+determine when it has found the correct project root directory.
+
+Example: For Ruby projects, there is often a Rakefile in the root
+directory, thus >
+    let project_root_pt_ruby_globs = ["{R,r}akefile"]
+could be used to allow project-root to find Ruby root directories. >
+
+-----------------------------------------------------------------------
+2.2. Test command                         *project-root-test-command*
+
+Variables of the form >
+    project_root_pt_{project_type}_test_command
+are used by |ProjectRootTest| to run tests for the project.
+
+Example: For Ruby projects, a common setup is to have >
+    rake test
+run the tests for the current project. >
+
+Thus running >
+    let project_root_pt_ruby_test_command = "rake test"
+would allow project-root to run tests for appropriate ruby projects. >
+
+=======================================================================
+3. Commands                                     *project-root-commands*
+
+-----------------------------------------------------------------------
+                                                      *ProjectRootTest*
+Will attempt to run tests for the current project based on the contents
+of the |project-root-test-command|.
+
+-----------------------------------------------------------------------
+                                                *ProjectRootBrowseRoot*
+Will open a directory browser in the root of the current project.
+If |NERDTree| is installed, then it is used for the directory browser.
+Otherwise |netrw| is used.
+
+=======================================================================
+4. About                                           *project-root-about*
+
+project-root is written and maintained by GuiltyDolphin, whose contact
+is GuiltyDolphin at gmail dot com.
+
+The project is hosted on GitHub:
+    https://www.github.com/GuiltyDolphin/project-root-vim
+
+=======================================================================
+5. License                                       *project-root-license*
+
+project-root is licensed under the GNU General Public License version 3.
+
+
+ vim:tw=78:ts=8:ft=help:norl:

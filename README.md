@@ -13,6 +13,11 @@ If you have [Vundle](https://www.github.com/VundleVim/Vundle.vim),
 then just add `Plugin 'guiltydolphin/project-root-vim'` to the
 plugin section of your vimrc.
 
+Help
+----
+
+Run `help project-root` in Vim for a detailed explanation of
+project-root's features.
 
 License
 -------
