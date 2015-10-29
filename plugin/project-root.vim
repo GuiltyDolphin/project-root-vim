@@ -28,3 +28,62 @@ endif
 let g:loaded_project_root = 1
 
 " }}}
+
+" Private {{{
+
+" Globbing {{{
+
+" Generate a glob pattern that will match any of the items in the
+" given list.
+"
+" Basically, for a list ['a', 'b', 'c'], it will generate
+" the pattern "{a,b,c}".
+"
+" Optional arguments:
+" a:1 - When nonzero will produce a glob that makes the items optional
+" (e.g, would produce "{a,b,c,}" for the above example).
+function! s:ListToGlob(to_glob, ...)
+  let allow_other = get(a:000, 0) ? ',' : ''
+  return '{' . join(a:to_glob, ',') . allow_other . '}'
+endfunction
+
+" Starting with the directory of a:start_path, searches upwards
+" for a:pattern, returning the first result or an empty string.
+"
+" Note that 'first result' refers to the first set of matches in a
+" single directory - this may contain several individual matches.
+function! s:GlobUp(pattern, start_path)
+  let curr_dir = fnamemodify(a:start_path, ":p:h")
+  while 1
+    let curr_res = globpath(curr_dir, a:pattern)
+    if curr_res !~ '\v^$'
+      return curr_res
+    endif
+    " When the base-most path has been checked.
+    if curr_dir =~ '\v^[./]$'
+      return ''
+    endif
+    let curr_dir = fnamemodify(curr_dir, ":h")
+  endwhile
+endfunction
+
+" The same as *GlobUp*, but will return the first directory
+" containing the match, rather than all the matches.
+function! s:GlobUpDir(pattern, start_directory)
+  let curr_dir = fnamemodify(a:start_directory, ":p")
+  while 1
+    let curr_res = globpath(curr_dir, a:pattern)
+    if curr_res !~ '\v^$'
+      return curr_dir
+    endif
+    " When the base-most path has been checked.
+    if curr_dir =~ '\v^[./]$'
+      return ''
+    endif
+    let curr_dir = fnamemodify(curr_dir, ":h")
+  endwhile
+endfunction
+
+" }}}
+
+" }}}
