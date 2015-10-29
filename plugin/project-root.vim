@@ -33,6 +33,23 @@ let g:loaded_project_root = 1
 
 " Project {{{
 
+" Glob {{{
+
+" Project file globs
+"
+" To add (or overwrite) a project glob use the form
+" let g:project_root_pt_{project_type}_globs = [list of globs]
+let g:project_root_pt_unknown_globs = ['.git', 'LICEN{S,C}E', 'README*']
+
+" Get the glob pattern to match for the current project type.
+function s:GetProjectGlob()
+  return s:ListToGlob(extend(
+        \ copy(g:project_root_pt_{b:project_root_type}_globs),
+        \ g:project_root_pt_unknown_globs))
+endfunction
+
+" }}}
+
 " Setup {{{
 
 " Set the project root directory if it doesn't already exist for
