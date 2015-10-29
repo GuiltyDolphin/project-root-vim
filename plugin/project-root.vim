@@ -192,6 +192,17 @@ function! ProjectRootTest()
   endif
 endfunction
 
+" Open a directory browser for the current project root directory.
+function! ProjectRootBrowseRoot()
+  if exists(':NERDTreeToggle')
+    exec 'NERDTreeToggle ' . b:project_root_directory
+  elseif exists(':Sexplore')
+    exec 'Sexplore ' . b:project_root_directory
+  else
+    echoerr 'Could not open a directory browser'
+  endif
+endfunction
+
 " }}}
 
 " Initialize {{{
