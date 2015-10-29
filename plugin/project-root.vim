@@ -31,6 +31,67 @@ let g:loaded_project_root = 1
 
 " Private {{{
 
+" Project {{{
+
+" Setup {{{
+
+" Set the project root directory if it doesn't already exist for
+" the current buffer.
+function! s:SetProjectRootDirectory()
+  if exists('b:project_root_directory')
+    return
+  endif
+  let b:project_root_directory = s:GetProjectRootDirectory()
+endfunction
+
+" Attempt to find the root project directory for a file.
+"
+" Only really works if there is a standard file (or directory structure)
+" that indicates the root of a project - e.g, for Haskell (Cabal)
+" projects, there is usually a .cabal file at the root of the project.
+"
+" If no project directory can be found then the current directory
+" is returned instead.
+function! s:GetProjectRootDirectory()
+  let current_directory = expand("%:p:h")
+  let res = s:GlobUpDir(s:GetProjectGlob(), current_directory)
+  if res =~ '\v^$'
+    let res = current_directory  " Or whatever default?
+  endif
+  return res
+endfunction
+
+" Set the project type for the current buffer if it hasn't already
+" been set.
+function! s:SetProjectType()
+  if exists('b:project_root_type')
+    return
+  endif
+  let b:project_root_type = s:GetProjectType()
+  if !exists('g:project_root_pt_{b:project_root_type}_globs')
+    let g:project_root_pt_{b:project_root_type}_globs = g:project_root_pt_unknown_globs
+  endif
+endfunction
+
+" Determine the current project type.
+function! s:GetProjectType()
+  if &filetype =~ '\v^$'
+    return 'unknown'
+  endif
+  return &filetype
+endfunction
+
+" Initialize project root.
+function! s:ProjectRootInitialize()
+  call s:SetProjectType()
+  call s:SetProjectRootDirectory()
+  return 1
+endfunction
+
+" }}}
+
+" }}}
+
 " Globbing {{{
 
 " Generate a glob pattern that will match any of the items in the
@@ -86,4 +147,11 @@ endfunction
 
 " }}}
 
+" }}}
+
+" Initialize {{{
+augroup ProjectRootInit
+  au!
+  au BufRead * call <SID>ProjectRootInitialize()
+augroup END
 " }}}
