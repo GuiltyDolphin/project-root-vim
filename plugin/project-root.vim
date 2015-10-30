@@ -185,10 +185,14 @@ endfunction
 
 " Open a directory browser for the current project root directory.
 function! s:ProjectRootBrowseRoot()
+  call s:ProjectRootBrowse(b:project_root_directory)
+endfunction
+
+function! s:ProjectRootBrowse(dir)
   if exists(':NERDTreeToggle')
-    exec 'NERDTreeToggle ' . b:project_root_directory
+    exec 'NERDTreeToggle ' . a:dir
   elseif exists(':Sexplore')
-    exec 'Sexplore ' . b:project_root_directory
+    exec 'Sexplore ' . a:dir
   else
     echoerr 'Could not open a directory browser'
   endif
