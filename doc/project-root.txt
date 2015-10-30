@@ -31,6 +31,9 @@ behaviour. They should be set in your .vimrc.
 |'project_root_pt_unknown_globs'|    Glob patterns for matching unknown
                                    project types.
 
+|'project_root_search_method'|       Method to use when searching for
+                                   files/directories.
+
 |'project_root_allow_unknown'|       Allow usage of the unknown
                                    project-type.
 
@@ -54,6 +57,27 @@ If there are no globs set for the current project type, the current
 project globs fail to complete or no project type can be ascertained,
 then the value of this option will be used to determine the current
 project directory root.
+
+-----------------------------------------------------------------------
+                                         *'project_root_search_method'*
+Values: 1 or 2
+Default: 1
+
+Determines which search method project-root should use for finding
+files and/or directories.
+
+The default value (1) tells project-root to use a priority method.
+With the priority method, glob patterns are given precedence based
+on the order in which they occur.
+
+For example, with the glob patterns: >
+    ['.git', 'LICENSE', 'README']
+the entire parent tree would first be searched for '.git', then >
+failing to find that it would search for 'LICENSE', then 'README'.
+
+The other possible option (2) is the 'first matching' method.
+With this method, each glob is searched in each parent until ANY
+of them matches.
 
 -----------------------------------------------------------------------
                                          *'project_root_allow_unknown'*

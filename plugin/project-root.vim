@@ -33,6 +33,9 @@ function! s:ProjectRootInitGlob()
   if !exists('g:project_root_allow_unknown')
     let g:project_root_allow_unknown = 1
   endif
+  if !exists('g:project_root_search_method')
+    let g:project_root_search_method = 1
+  endif
 endfunction
 
 " }}}
@@ -54,6 +57,8 @@ endfunction
 
 " Setup {{{
 
+" Project directory {{{
+
 " Set the project root directory if it doesn't already exist for
 " the current buffer.
 function! s:SetProjectRootDirectory()
@@ -72,13 +77,98 @@ endfunction
 " If no project directory can be found then the current directory
 " is returned instead.
 function! s:GetProjectRootDirectory()
-  let current_directory = expand("%:p:h")
-  let res = s:GlobUpDir(s:GetProjectGlob(), current_directory)
-  if res =~ '\v^$'
-    let res = current_directory  " Or whatever default?
+  if g:project_root_search_method == 1
+    return s:GetProjectRootDirectoryPriority()
+  elseif g:project_root_search_method == 2
+    return s:GetProjectRootDirectoryFirst()
   endif
-  return res
 endfunction
+
+" Get the project root directory without regards to the globs ordering.
+"
+" All globs defined in the pt_globs variable are searched for
+" simultaneously.
+"
+" Example:
+" If g:project_root_pt_foo_globs = ["base", "base_other"]
+"
+" Then the first parent tree matching the glob "base" or "base_other"
+" will be returned.
+"
+" Will perform at best 1 search, and at worst 2*d searches, where
+" d is the depth of the current directory relative to the root
+" directory ('/').
+function! s:GetProjectRootDirectoryFirst(...)
+  let current_directory = expand("%:p:h")
+  let project_type = get(a:000, 0, b:project_root_type)
+  let project_globs = s:ProjectGlobsToGlob(project_type)
+  if project_globs =~ '\v^$'
+    return s:CheckUnknownOrEnd(project_type, current_directory,
+          \ 's:GetProjectRootDirectoryFirst')
+  else
+    let res = s:GlobUpDir(project_globs, current_directory)
+    if res =~ '\v^$'
+      return s:CheckUnknownOrEnd(project_type, current_directory,
+            \ 's:GetProjectRootDirectoryFirst')
+    else
+      return res
+    endif
+  endif
+endfunction
+
+" True if checking unknown is allowed and the current project type
+" is not unknown.
+function! s:ShouldCheckUnknown(project_type)
+  return g:project_root_allow_unknown && a:project_type !~ 'unknown'
+endfunction
+
+" Check unknown (if allowed) or give back the current directory.
+function! s:CheckUnknownOrEnd(project_type, current_directory, fun)
+  if s:ShouldCheckUnknown(a:project_type)
+    return call(a:fun, ['unknown'])
+  else
+    return a:current_directory
+  endif
+endfunction
+
+" Get the project root directory based on the globs ordering.
+"
+" This gives priority to items defined earlier in the pt_globs
+" variables.
+"
+" Example:
+" If g:project_root_pt_foo_globs = ["base", "base_other"]
+"
+" Then first the parent tree will be searched with the glob 'base',
+" then will return the first directory containing 'base' if found,
+" otherwise will search for 'base_other'.
+"
+" This will perform 1 search in the best case, or n*d + u*d searches
+" in the worst case, where n is the number of globs in the pt_globs
+" variable, u is the number of globs in the pt_unknown_globs variable,
+" and d is the depth of the current directory relative to the root
+" directory ('/').
+"
+" Optional arguments:
+" a:1 - The project type for which the globs should be used.
+"       Defaults to the current project type.
+function! s:GetProjectRootDirectoryPriority(...)
+  let current_directory = expand("%:p:h")
+  let project_type = get(a:000, 0, b:project_root_type)
+  let project_globs = g:project_root_pt_{project_type}_globs
+  for glb in project_globs
+    let res = s:GlobUpDir(glb, current_directory)
+    if res !~ '\v^$'
+      return res
+    endif
+  endfor
+  return s:CheckUnknownOrEnd(project_type, current_directory,
+        \ 's:GetProjectRootDirectoryPriority')
+endfunction
+
+" }}}
+
+" Project type {{{
 
 " Set the project type for the current buffer if it hasn't already
 " been set.
@@ -104,6 +194,8 @@ endfunction
 function! s:NormalizeProjectType(project_type)
   return substitute(a:project_type, '\v(^\d|[^0-9a-zA-Z_])', '_', 'g')
 endfunction
+
+" }}}
 
 " Initialize project root.
 function! s:ProjectRootInitialize()
