@@ -99,7 +99,7 @@ endfunction
 
 " Normalize a project type
 function! s:NormalizeProjectType(project_type)
-  return substitute(a:project_type, '\v[^0-9a-zA-Z_]', '_', 'g')
+  return substitute(a:project_type, '\v(^\d|[^0-9a-zA-Z_])', '_', 'g')
 endfunction
 
 " Initialize project root.
