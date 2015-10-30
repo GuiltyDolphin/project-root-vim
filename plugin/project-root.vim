@@ -19,17 +19,12 @@ let g:loaded_project_root = 1
 
 " Glob {{{
 
-" Project file globs
-"
-" To add (or overwrite) a project glob use the form
-" let g:project_root_pt_{project_type}_globs = [list of globs]
-let g:project_root_pt_unknown_globs = ['.git', 'LICEN{S,C}E', 'README*']
+" Create a flat glob pattern that will match all of the globs for the
+" given project type.
+function! s:ProjectGlobsToGlob(project_type)
+  return s:ListToGlob(g:project_root_pt_{a:project_type}_globs)
+endfunction
 
-" Get the glob pattern to match for the current project type.
-function s:GetProjectGlob()
-  return s:ListToGlob(extend(
-        \ copy(g:project_root_pt_{b:project_root_type}_globs),
-        \ g:project_root_pt_unknown_globs))
 endfunction
 
 " }}}
@@ -125,7 +120,14 @@ endfunction
 " Optional arguments:
 " a:1 - When nonzero will produce a glob that makes the items optional
 " (e.g, would produce "{a,b,c,}" for the above example).
+"
+" Issue: The '' string returned when the initial list is empty will
+" match the current directory (no string match required) - it should
+" match nothing!
 function! s:ListToGlob(to_glob, ...)
+  if len(a:to_glob) == 0
+    return ''  " Shouldn't match anything!
+  endif
   let allow_other = get(a:000, 0) ? ',' : ''
   return '{' . join(a:to_glob, ',') . allow_other . '}'
 endfunction
