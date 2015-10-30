@@ -25,6 +25,14 @@ function! s:ProjectGlobsToGlob(project_type)
   return s:ListToGlob(g:project_root_pt_{a:project_type}_globs)
 endfunction
 
+" Initialize glob-related settings.
+function! s:ProjectRootInitGlob()
+  if !exists('g:project_root_pt_unknown_globs')
+    let g:project_root_pt_unknown_globs = ['.git', 'LICEN{S,C}E', 'README*']
+  endif
+  if !exists('g:project_root_allow_unknown')
+    let g:project_root_allow_unknown = 1
+  endif
 endfunction
 
 " }}}
@@ -80,7 +88,7 @@ function! s:SetProjectType()
   endif
   let b:project_root_type = s:GetProjectType()
   if !exists('g:project_root_pt_{b:project_root_type}_globs')
-    let g:project_root_pt_{b:project_root_type}_globs = g:project_root_pt_unknown_globs
+    let g:project_root_pt_{b:project_root_type}_globs = []
   endif
 endfunction
 
@@ -208,6 +216,13 @@ endfunction
 " }}}
 
 " Initialize {{{
+
+" Initialize globals
+function! s:ProjectRootInitGlobal()
+  call s:ProjectRootInitGlob()
+endfunction
+
+call <SID>ProjectRootInitGlobal()
 
 call <SID>ProjectRootInitCommands()
 
