@@ -31,6 +31,8 @@ behaviour. They should be set in your .vimrc.
 |'project_root_pt_unknown_globs'|    Glob patterns for matching unknown
                                    project types.
 
+|'b:project_root_type'|              Project type for the current buffer.
+
 -----------------------------------------------------------------------
                                                 *'loaded_project_root'*
 
@@ -46,6 +48,20 @@ If there are no globs set for the current project type, the current
 project globs fail to complete or no project type can be ascertained,
 then the value of this option will be used to determine the current
 project directory root.
+
+-----------------------------------------------------------------------
+                                                *'b:project_root_type'*
+Values: String representing the current project type.
+Default: Determined by the filetype (see below).
+
+Holds the project type for the current buffer.
+
+project-root will try and guess the project type based on the filetype
+of the current buffer. If this isn't what you want, then set it
+yourself in your .vimrc.
+
+Note that the value of this variable should represent a valid vim
+variable name (see |41.2|) - otherwise there will be issues!
 
 -----------------------------------------------------------------------
 2.1. Glob matching                         *project-root-glob-matching*
