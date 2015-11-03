@@ -198,7 +198,7 @@ endfunction
 " }}}
 
 " Initialize project root.
-function! s:ProjectRootInitialize()
+function! s:InitializeBuffer()
   call s:SetProjectType()
   call s:SetProjectRootDirectory()
   return 1
@@ -320,7 +320,7 @@ call <SID>ProjectRootInitCommands()
 
 augroup ProjectRootInit
   au!
-  au BufRead * call <SID>ProjectRootInitialize()
+  au BufRead,BufNewFile * call <SID>InitializeBuffer()
 augroup END
 
 " }}}
