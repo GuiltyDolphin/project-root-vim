@@ -229,19 +229,20 @@ endfunction
 
 " }}}
 
-" Initialize project root.
+" Initialize project root for the current buffer.
 function! s:InitializeBuffer()
   call s:SetProjectType()
   call s:SetProjectRootDirectory()
   return 1
 endfunction
 
-
 " }}}
 
 " }}}
 
 " Globbing {{{
+
+" Producing Globs {{{
 
 " Generate a glob pattern that will match any of the items in the
 " given list.
@@ -264,6 +265,19 @@ function! s:ListToGlob(to_glob, ...)
   return '{' . join(a:to_glob, ',') . allow_other . '}'
 endfunction
 
+
+" Generate a glob that will ignore casing for alpha characters.
+"
+" a:pattern should be a string (preferably one that could be used
+" as a glob pattern).
+"
+" Example:
+" s:GlobIgnoreCase("foo") would become "[Ff][Oo][Oo]"
+function! s:GlobIgnoreCase(pattern)
+  return substitute(a:pattern, '\a', '[\u\0\l\0]', 'g')
+endfunction
+
+" }}}
 
 " Searching {{{
 
