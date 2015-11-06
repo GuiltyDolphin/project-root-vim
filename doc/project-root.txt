@@ -12,6 +12,7 @@ CONTENTS                                        *project-root-contents*
     3.1.Adding new projects.............|project-root-adding-projects|
     3.2.Project attributes..............|project-root-project-attributes|
     4.Commands..........................|project-root-commands|
+    4.1.Browsing........................|project-root-browsing|
     5.About.............................|project-root-about|
     6.License...........................|project-root-license|
 
@@ -182,12 +183,29 @@ given lower precedence.
 Will attempt to run tests for the current project. See
 |project-root-test_command|.
 
+-----------------------------------------------------------------------
+
+4.1. Browsing                                   *project-root-browsing*
+
+The following commands can be used for project navigation.
+
+In general, these commands will open a directory browser, using
+|NERDTree| if it is installed, otherwise using |netrw|.
 
 -----------------------------------------------------------------------
                                                 *ProjectRootBrowseRoot*
-Will open a directory browser in the root of the current project.
-If |NERDTree| is installed, then it is used for the directory browser.
-Otherwise |netrw| is used.
+Browse the root directory of the current project. See
+|'b:project_root_directory'| and |project-root-root_globs|.
+
+-----------------------------------------------------------------------
+                                               *ProjectRootBrowseTests*
+Browse the test directory for the current project. See
+|project-root-test_globs|.
+
+-----------------------------------------------------------------------
+                                              *ProjectRootBrowseSource*
+Browse the source directory for the current project. See
+|project-root-source_globs|.
 
 =======================================================================
 5. About                                           *project-root-about*

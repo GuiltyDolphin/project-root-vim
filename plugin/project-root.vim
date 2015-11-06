@@ -17,14 +17,6 @@ let g:loaded_project_root = 1
 
 " Project {{{
 
-" Glob {{{
-
-" Create a flat glob pattern that will match all of the globs for the
-" given project type.
-function! s:ProjectGlobsToGlob(project_type)
-  return s:ListToGlob(g:project_root_pt_{a:project_type}_globs)
-endfunction
-
 " Project types {{{
 
 " Initializes the 'base_project' project type along with the project
@@ -49,11 +41,56 @@ endfunction
 
 " }}}
 
-" Testing {{{
+" Searching for file patterns {{{
 
 function! s:PreferredSearchMethod(project_type)
   return get(g:project_root_pt[a:project_type], 'prefer_search', g:project_root_search_method)
 endfunction
+
+" Optional arguments:
+" a:1 - type of file (same as in the 'find' command on Linux)
+function! s:ProjectGlobDown(attr, ...)
+  let ftype = get(a:000, 0)
+  let start_dir = b:project_root_directory
+  let res_order = s:GetResolutionOrder(b:project_root_type, a:attr)
+  for parent in res_order
+    let globs = g:project_root_pt[parent][a:attr]
+    if globs == []
+      continue
+    endif
+    let prefer_search = s:PreferredSearchMethod(parent)
+    if prefer_search =~ '\cfirst'
+      let res = s:ProjectGlobDownFirst(globs, start_dir, ftype)
+    elseif prefer_search =~ '\cpriority'
+      let res = s:ProjectGlobDownPriority(globs, start_dir, ftype)
+    endif
+    if res != []
+      return res
+    endif
+  endfor
+  return []
+endfunction
+
+function! s:ProjectGlobDownFirst(glob_list, start_directory, ...)
+  let ftype = get(a:000, 0)
+  let glb = s:ListToGlob(a:glob_list)
+  return s:FindDown(a:start_directory, glb, ftype)
+endfunction
+
+function! s:ProjectGlobDownPriority(glob_list, start_directory, ...)
+  let ftype = get(a:000, 0)
+  for glb in a:glob_list
+    let res = s:FindDown(a:start_directory, glb, ftype)
+    if res != []
+      return res
+    endif
+  endfor
+  return []
+endfunction
+
+" }}}
+
+" Testing {{{
 
 " Get the test command for the current project type.
 function! s:ProjectTestCommand()
@@ -227,6 +264,9 @@ function! s:ListToGlob(to_glob, ...)
   return '{' . join(a:to_glob, ',') . allow_other . '}'
 endfunction
 
+
+" Searching {{{
+
 " Starting with the directory of a:start_path, searches upwards
 " for a:pattern, returning the first result or an empty string.
 "
@@ -264,6 +304,27 @@ function! s:GlobUpDir(pattern, start_directory)
   endwhile
 endfunction
 
+" Find matches for name, searching recursively downwards from
+" start_directory.
+"
+" Returns a list of paths.
+function! s:FindDown(start_directory, name, ...)
+  let ftype = get(a:000, 0)
+  if ftype
+    let fstr = ' -type ' . ftype
+  else
+    let fstr = ''
+  endif
+  let search_names = join(expand(a:name, 0, 1), "' -o -name '")
+  return systemlist(
+        \ "find " . a:start_directory
+        \ . " -name '" . search_names . "'"
+        \ . fstr)
+endfunction
+
+" }}}
+
+" }}}
 
 " Inheritance {{{
 
@@ -305,12 +366,11 @@ function! s:ProjectRootTest()
   endif
 endfunction
 
+" Browsing {{{
 
-" Open a directory browser for the current project root directory.
-function! s:ProjectRootBrowseRoot()
-  call s:ProjectRootBrowse(b:project_root_directory)
-endfunction
+" Utility {{{
 
+" Open a directory browser for the given directory.
 function! s:ProjectRootBrowse(dir)
   if exists(':NERDTreeToggle')
     exec 'NERDTreeToggle ' . a:dir
@@ -321,12 +381,66 @@ function! s:ProjectRootBrowse(dir)
   endif
 endfunction
 
+" Get a subdirectory of the root directory using the glob patterns for a
+" project.
+function! s:RootSubDir(glob_attr)
+  let res = s:ProjectGlobDown(a:glob_attr, 'd')
+  if res == []
+    return ''
+  endif
+  return res[0]
+endfunction
+
+" }}}
+
+" Open a directory browser for the current project root directory.
+function! s:ProjectRootBrowseRoot()
+  call s:ProjectRootBrowse(b:project_root_directory)
+endfunction
+
+" Tests {{{
+
+function! s:ProjectRootGetTestDir()
+  return s:RootSubDir('test_globs')
+endfunction
+
+function! s:ProjectRootBrowseTests()
+  let test_dir = s:ProjectRootGetTestDir()
+  if test_dir =~ '\v^$'
+    echo "No test directory found"
+    return
+  endif
+  call s:ProjectRootBrowse(test_dir)
+endfunction
+
+" }}}
+
+" Source {{{
+
+function! s:ProjectRootGetSourceDir()
+  return s:RootSubDir('source_globs')
+endfunction
+
+function! s:ProjectRootBrowseSource()
+  let source_dir = s:ProjectRootGetSourceDir()
+  if source_dir =~ '\v^$'
+    echo "No source directory found"
+    return
+  endif
+  call s:ProjectRootBrowse(source_dir)
+endfunction
+
+" }}}
+
+" }}}
 
 " Initialize {{{
 
 function! s:ProjectRootInitCommands()
   command! ProjectRootBrowseRoot :call <SID>ProjectRootBrowseRoot()
   command! ProjectRootTest :call <SID>ProjectRootTest()
+  command! ProjectRootBrowseTests :call <SID>ProjectRootBrowseTests()
+  command! ProjectRootBrowseSource :call <SID>ProjectRootBrowseSource()
 endfunction
 
 " }}}
