@@ -339,6 +339,7 @@ endfunction
 
 function! s:InitializeGlobalSettings()
   call s:InitializeGlobalSetting('project_root_search_method', 'priority')
+  call s:InitializeGlobalSetting('project_root_implicit_base', 1)
 endfunction
 
 function! s:InitializeGlobalSetting(name, default)

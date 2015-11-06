@@ -29,12 +29,11 @@ behavior. They should be set in your .vimrc.
 
 |'loaded_project_root'|              Turns off the script.
 
-|'project_root_pt_unknown_globs'|    Glob patterns for matching unknown
-                                   project types.
-
 |'project_root_search_method'|       Method to use when searching for
                                    files/directories.
 
+|'project_root_implicit_base'|       Cause new projects to inherit from the
+                                   base project.
 
 |'b:project_root_directory'|         Project directory for the current
                                    buffer.
@@ -69,29 +68,12 @@ With this method, each glob is searched in each parent until ANY
 of them matches.
 
 -----------------------------------------------------------------------
-                                         *'project_root_allow_unknown'*
+                                         *'project_root_implicit_base'*
 Values: 0 or 1
 Default: 1
 
-When nonzero, will allow project-root to use the unknown project type
-when the current project type fails to work for a particular function.
-
-This is better explained with an example.
-
-If, for example, you were working on a python project and had set >
-    let g:project_root_pt_python_globs = ['setup.py']
-so that project-root could detect common python projects. >
-
-If you happen to be working on a project that hasn't yet created a
-'setup.py' file, then project-root would have to default to using the
-current directory (assuming 'project_root_allow_unknown' was zero).
-
-If 'project_root_allow_unknown' was nonzero however, this would tell
-project-root to attempt to use the unknown project type to determine
-the project directory.
-
-In this case, project-root would use the |'project_root_pt_unknown_globs'|
-variable for finding the current project directory.
+When nonzero, will cause all new project types to implicitly inherit
+from 'base_project'.
 
 -----------------------------------------------------------------------
                                            *'b:project_root_directory'*
