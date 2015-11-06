@@ -8,11 +8,12 @@ CONTENTS                                        *project-root-contents*
 
     1.Introduction......................|project-root|
     2.Options...........................|project-root-options|
-    2.1.Glob matching...................|project-root-glob-matching|
-    2.2.Test command....................|project-root-test-command|
-    3.Commands..........................|project-root-commands|
-    4.About.............................|project-root-about|
-    5.License...........................|project-root-license|
+    3.Project configuration.............|project-root-project-config|
+    3.1.Adding new projects.............|project-root-adding-projects|
+    3.2.Project attributes..............|project-root-project-attributes|
+    4.Commands..........................|project-root-commands|
+    5.About.............................|project-root-about|
+    6.License...........................|project-root-license|
 
 =======================================================================
 1. Introduction                                          *project-root*
@@ -21,10 +22,10 @@ This plugin aims to make working with the root directory of projects
 easier.
 
 =======================================================================
-2. Options                                          *project-root-vars*
+2. Options                                       *project-root-options*
 
 The following options can be used to customize project-root's
-behaviour. They should be set in your .vimrc.
+behavior. They should be set in your .vimrc.
 
 |'loaded_project_root'|              Turns off the script.
 
@@ -34,8 +35,6 @@ behaviour. They should be set in your .vimrc.
 |'project_root_search_method'|       Method to use when searching for
                                    files/directories.
 
-|'project_root_allow_unknown'|       Allow usage of the unknown
-                                   project-type.
 
 |'b:project_root_directory'|         Project directory for the current
                                    buffer.
@@ -47,16 +46,6 @@ behaviour. They should be set in your .vimrc.
 
 To prevent this plugin from loading, put the following in your .vimrc: >
     let loaded_project_root = 1
-<
------------------------------------------------------------------------
-                                      *'project_root_pt_unknown_globs'*
-Values: A list of glob pattern strings.
-Default: [".git", "LICEN{S,C}E", "README*"]
-
-If there are no globs set for the current project type, the current
-project globs fail to complete or no project type can be ascertained,
-then the value of this option will be used to determine the current
-project directory root.
 
 -----------------------------------------------------------------------
                                          *'project_root_search_method'*
@@ -127,45 +116,76 @@ project-root will try and guess the project type based on the filetype
 of the current buffer. If this isn't what you want, then set it
 yourself in your .vimrc.
 
-Note that the value of this variable should represent a valid vim
-variable name (see |41.2|) - otherwise there will be issues!
+=======================================================================
+3. Project configuration                  *project-root-project-config*
+
+The |'project_root_pt'| variable contains the configuration for
+existing project types.
 
 -----------------------------------------------------------------------
-2.1. Glob matching                         *project-root-glob-matching*
+3.1. Adding a new project type           *project-root-adding-projects*
 
-To add smart project matching for a particular project type, set a
-variable of the form: >
-    project_root_pt_{project_type}_globs
-To a list of glob patterns. This will enable project-root to better >
-determine when it has found the correct project root directory.
+Project skeletons can be defined as a dictionary, and then passed
+to the proot#initialize_project function for basic setup.
+
+Example: >
+  let ruby_dict = {'root_globs': ['Rakefile']}
+
+  call proot#initialize_project('ruby', ruby_dict)
+>
+
+-----------------------------------------------------------------------
+3.2. Project attributes               *project-root-project-attributes*
+
+Project attributes may be specified as keys in a dictionary which
+can then be passed to proot#initialize_project. See
+|project-root-adding-projects|.
+
+The following summarizes the available project attributes:
+
+----------
+root_globs                                    *project-root-root_globs*
+
+A list of glob patterns that are used to locate the root directory.
 
 Example: For Ruby projects, there is often a Rakefile in the root
 directory, thus >
-    let project_root_pt_ruby_globs = ["{R,r}akefile"]
+    let project_root_pt['ruby']['root_globs'] = ["Rakefile"]
 could be used to allow project-root to find Ruby root directories. >
 
------------------------------------------------------------------------
-2.2. Test command                         *project-root-test-command*
+----------
+test_globs                                    *project-root-test_globs*
 
-Variables of the form >
-    project_root_pt_{project_type}_test_command
-are used by |ProjectRootTest| to run tests for the project.
+A list of glob patterns that are used to locate the test directory.
+
+------------
+source_globs                                *project-root-source_globs*
+
+A list of glob patterns that are used to locate the source directory.
+
+------------
+test_command                                *project-root-test_command*
+
+String representing a command that will run all the tests for the
+current project when run in the root directory.
 
 Example: For Ruby projects, a common setup is to have >
     rake test
 run the tests for the current project. >
 
 Thus running >
-    let project_root_pt_ruby_test_command = "rake test"
+    let project_root_pt['ruby']['test_command'] = 'rake test'
 would allow project-root to run tests for appropriate ruby projects. >
 
+
 =======================================================================
-3. Commands                                     *project-root-commands*
+4. Commands                                     *project-root-commands*
 
 -----------------------------------------------------------------------
                                                       *ProjectRootTest*
-Will attempt to run tests for the current project based on the contents
-of the |project-root-test-command|.
+Will attempt to run tests for the current project. See
+|project-root-test_command|.
+
 
 -----------------------------------------------------------------------
                                                 *ProjectRootBrowseRoot*
@@ -174,7 +194,7 @@ If |NERDTree| is installed, then it is used for the directory browser.
 Otherwise |netrw| is used.
 
 =======================================================================
-4. About                                           *project-root-about*
+5. About                                           *project-root-about*
 
 project-root is written and maintained by GuiltyDolphin, whose contact
 is GuiltyDolphin at gmail dot com.
@@ -183,7 +203,7 @@ The project is hosted on GitHub:
     https://www.github.com/GuiltyDolphin/project-root-vim
 
 =======================================================================
-5. License                                       *project-root-license*
+6. License                                       *project-root-license*
 
 project-root is licensed under the GNU General Public License version 3.
 

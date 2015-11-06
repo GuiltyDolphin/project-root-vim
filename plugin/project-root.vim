@@ -25,16 +25,25 @@ function! s:ProjectGlobsToGlob(project_type)
   return s:ListToGlob(g:project_root_pt_{a:project_type}_globs)
 endfunction
 
-" Initialize glob-related settings.
-function! s:ProjectRootInitGlob()
-  if !exists('g:project_root_pt_unknown_globs')
-    let g:project_root_pt_unknown_globs = ['.git', 'LICEN{S,C}E', 'README*']
+" Project types {{{
+
+" Initializes the 'base_project' project type along with the project
+" dictionary.
+function! s:InitializeProjectBase()
+  " The base dictionary for project configuration.
+  if !exists("g:project_root_pt")
+    let g:project_root_pt = {}
   endif
-  if !exists('g:project_root_allow_unknown')
-    let g:project_root_allow_unknown = 1
-  endif
-  if !exists('g:project_root_search_method')
-    let g:project_root_search_method = 1
+  if !exists("g:project_root_pt.base_project")
+    " Base project type for implicit inheritance.
+    let g:project_root_pt.base_project =
+          \ { 'root_globs': ['.git', s:GlobIgnoreCase('licen{s,c}e'),
+          \                  s:GlobIgnoreCase('readme*')],
+          \   'test_globs': [s:GlobIgnoreCase('test{s,}')],
+          \   'source_globs': [s:GlobIgnoreCase('source'),
+          \                    s:GlobIgnoreCase('src')],
+          \   'inherits':   [],
+          \ }
   endif
 endfunction
 
@@ -177,9 +186,7 @@ function! s:SetProjectType()
     return
   endif
   let b:project_root_type = s:GetProjectType()
-  if !exists('g:project_root_pt_{b:project_root_type}_globs')
-    let g:project_root_pt_{b:project_root_type}_globs = []
-  endif
+  call proot#initialize_project(b:project_root_type)
 endfunction
 
 " Determine the current project type.
@@ -300,6 +307,9 @@ function! s:ProjectRootBrowse(dir)
   endif
 endfunction
 
+
+" Initialize {{{
+
 function! s:ProjectRootInitCommands()
   command! ProjectRootBrowseRoot :call <SID>ProjectRootBrowseRoot()
   command! ProjectRootTest :call <SID>ProjectRootTest()
@@ -307,11 +317,13 @@ endfunction
 
 " }}}
 
+" }}}
+
 " Initialize {{{
 
 " Initialize globals
 function! s:ProjectRootInitGlobal()
-  call s:ProjectRootInitGlob()
+  call s:InitializeProjectBase()
 endfunction
 
 call <SID>ProjectRootInitGlobal()
