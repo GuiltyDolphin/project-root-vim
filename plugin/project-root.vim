@@ -57,7 +57,15 @@ endfunction
 
 " Get the test command for the current project type.
 function! s:ProjectTestCommand()
-  return g:project_root_pt_{b:project_root_type}_test_command
+  let with_tests = s:GetResolutionOrder(b:project_root_type, 'test_command')
+  for parent in with_tests
+    let pdict = g:project_root_pt[parent]
+    let test_command = pdict.test_command
+    if !empty(test_command)
+      return test_command
+    endif
+  endfor
+  return ''
 endfunction
 
 " }}}
@@ -108,34 +116,19 @@ endfunction
 function! s:GetProjectRootDirectoryFirst(...)
   let current_directory = expand("%:p:h")
   let project_type = get(a:000, 0, b:project_root_type)
-  let project_globs = s:ProjectGlobsToGlob(project_type)
-  if project_globs =~ '\v^$'
-    return s:CheckUnknownOrEnd(project_type, current_directory,
-          \ 's:GetProjectRootDirectoryFirst')
-  else
-    let res = s:GlobUpDir(project_globs, current_directory)
-    if res =~ '\v^$'
-      return s:CheckUnknownOrEnd(project_type, current_directory,
-            \ 's:GetProjectRootDirectoryFirst')
-    else
+  let res_order = s:GetResolutionOrder(project_type, 'root_globs')
+  for parent in res_order
+    let curr_dict = g:project_root_pt[parent]
+    let curr_globs = s:ListToGlob(curr_dict.root_globs)
+    if curr_globs =~ '\v^$'
+      continue
+    endif
+    let res = s:GlobUpDir(curr_globs, current_directory)
+    if res !~ '\v^$'
       return res
     endif
-  endif
-endfunction
-
-" True if checking unknown is allowed and the current project type
-" is not unknown.
-function! s:ShouldCheckUnknown(project_type)
-  return g:project_root_allow_unknown && a:project_type !~ 'unknown'
-endfunction
-
-" Check unknown (if allowed) or give back the current directory.
-function! s:CheckUnknownOrEnd(project_type, current_directory, fun)
-  if s:ShouldCheckUnknown(a:project_type)
-    return call(a:fun, ['unknown'])
-  else
-    return a:current_directory
-  endif
+  endfor
+  return current_directory
 endfunction
 
 " Get the project root directory based on the globs ordering.
@@ -162,15 +155,17 @@ endfunction
 function! s:GetProjectRootDirectoryPriority(...)
   let current_directory = expand("%:p:h")
   let project_type = get(a:000, 0, b:project_root_type)
-  let project_globs = g:project_root_pt_{project_type}_globs
-  for glb in project_globs
-    let res = s:GlobUpDir(glb, current_directory)
-    if res !~ '\v^$'
-      return res
-    endif
+  let res_order = s:GetResolutionOrder(project_type, 'root_globs')
+  for parent in res_order
+    let globs = g:project_root_pt[parent].root_globs
+    for glb in globs
+      let res = s:GlobUpDir(glb, current_directory)
+      if res !~ '\v^$'
+        return res
+      endif
+    endfor
   endfor
-  return s:CheckUnknownOrEnd(project_type, current_directory,
-        \ 's:GetProjectRootDirectoryPriority')
+  return current_directory
 endfunction
 
 " }}}
@@ -274,6 +269,31 @@ function! s:GlobUpDir(pattern, start_directory)
   endwhile
 endfunction
 
+
+" Inheritance {{{
+
+" Get the order in which a particular attribute should be resolved for the
+" given project dictionary.
+function! s:GetResolutionOrder(project_type, attr)
+  let inheritance_order = []
+  let curr_dict = g:project_root_pt[a:project_type]
+
+  if has_key(curr_dict, a:attr)
+    call add(inheritance_order, a:project_type)
+  endif
+
+  if get(curr_dict, 'satisfactory', 0) != 0
+    return inheritance_order
+  endif
+
+  for parent in curr_dict.inherits
+    let inherit_dicts = s:GetResolutionOrder(parent, a:attr)
+    let without_repeats = filter(copy(inherit_dicts), 'index(inheritance_order, v:val) == -1')
+    call extend(inheritance_order, without_repeats)
+  endfor
+  return inheritance_order
+endfunction
+
 " }}}
 
 " }}}
@@ -282,10 +302,11 @@ endfunction
 
 " Attempts to run tests for the current project.
 function! s:ProjectRootTest()
-  if exists(s:ProjectTestCommandVariableName())
-    exec '!cd ' . b:project_root_directory . ' && ' . s:ProjectTestCommand()
-  else
+  let test_command = s:ProjectTestCommand()
+  if empty(test_command)
     echo "No tests found"
+  else
+    exec '!cd ' . b:project_root_directory . ' && ' . test_command
   endif
 endfunction
 

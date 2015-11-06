@@ -177,6 +177,20 @@ Thus running >
     let project_root_pt['ruby']['test_command'] = 'rake test'
 would allow project-root to run tests for appropriate ruby projects. >
 
+--------
+inherits                                        *project-root-inherits*
+
+A list of projects which will be checked for the desired attribute
+should the current project fail to provide the attribute.
+
+Note that this should not be set manually, instead use
+
+proot#initialize_project({project-name}, {parents}, [, {higher}])
+
+Which will add {parents} to the inherits attribute for {project-name}.
+If {higher} is specified, and is non-zero, then the new parents will be
+given higher precedence than the old parents, otherwise they will be
+given lower precedence.
 
 =======================================================================
 4. Commands                                     *project-root-commands*

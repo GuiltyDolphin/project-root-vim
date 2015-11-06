@@ -52,7 +52,38 @@ function! proot#initialize_project(project_name, ...)
   call call('s:InitializeProjectType', [a:project_name] + a:000)
 endfunction
 
+" Add a:parents to the inheritance tree for a:project_name.
+"
+" Arguments:
+" a:project_name - name of the project type to update.
+" a:parents - parents to add.
+"
+" Optional arguments:
+" a:1 (default 0) - When nonzero, the new parents will have a
+" higher precedence than the current parents, otherwise they
+" will have a lower precedence.
+function! proot#project_add_inherits(project_name, parents, ...)
+  let curr_parents = g:project_root_pt[a:project_name]['inherits']
+  if get(a:000, 0) == 0
+    call s:NubExtend(curr_parents, a:parents)
+  else
+    call s:NubExtend(curr_parents, a:parents, 0)
+  endif
+endfunction
+
 " }}}
+
+" The same as Vim's 'extend' function, but will not add duplicate
+" elements.
+function! s:NubExtend(xs, ys, ...)
+  let to_extend = []
+  for elt in a:ys
+    if index(a:xs, elt) == -1 && index(to_extend, elt) == -1
+      call add(to_extend, elt)
+    endif
+  endfor
+  call call('extend', [a:xs, to_extend] + a:000)
+endfunction
 
 " }}}
 
