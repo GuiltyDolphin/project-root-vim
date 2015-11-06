@@ -49,22 +49,22 @@ To prevent this plugin from loading, put the following in your .vimrc: >
 
 -----------------------------------------------------------------------
                                          *'project_root_search_method'*
-Values: 1 or 2
-Default: 1
+Values: 'priority' or 'first'
+Default: 'priority'
 
 Determines which search method project-root should use for finding
 files and/or directories.
 
-The default value (1) tells project-root to use a priority method.
-With the priority method, glob patterns are given precedence based
-on the order in which they occur.
+The default value ('priority') tells project-root to use a priority
+method. With the priority method, glob patterns are given precedence
+based on the order in which they occur.
 
 For example, with the glob patterns: >
     ['.git', 'LICENSE', 'README']
 the entire parent tree would first be searched for '.git', then >
 failing to find that it would search for 'LICENSE', then 'README'.
 
-The other possible option (2) is the 'first matching' method.
+The other possible option ('first') is the 'first matching' method.
 With this method, each glob is searched in each parent until ANY
 of them matches.
 

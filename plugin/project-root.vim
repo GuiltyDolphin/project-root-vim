@@ -51,10 +51,8 @@ endfunction
 
 " Testing {{{
 
-" Generate the name of the variable that holds the test command
-" for the current project.
-function! s:ProjectTestCommandVariableName()
-  return "g:project_root_pt_{b:project_root_type}_test_command"
+function! s:PreferredSearchMethod(project_type)
+  return get(g:project_root_pt[a:project_type], 'prefer_search', g:project_root_search_method)
 endfunction
 
 " Get the test command for the current project type.
@@ -86,9 +84,9 @@ endfunction
 " If no project directory can be found then the current directory
 " is returned instead.
 function! s:GetProjectRootDirectory()
-  if g:project_root_search_method == 1
+  if g:project_root_search_method == 'priority'
     return s:GetProjectRootDirectoryPriority()
-  elseif g:project_root_search_method == 2
+  elseif g:project_root_search_method == 'first'
     return s:GetProjectRootDirectoryFirst()
   endif
 endfunction
@@ -321,8 +319,23 @@ endfunction
 
 " Initialize {{{
 
+" Initialize Settings {{{
+
+function! s:InitializeGlobalSettings()
+  call s:InitializeGlobalSetting('project_root_search_method', 'priority')
+endfunction
+
+function! s:InitializeGlobalSetting(name, default)
+  if !exists('g:{a:name}')
+    let g:{a:name} = a:default
+  endif
+endfunction
+
+" }}}
+
 " Initialize globals
 function! s:ProjectRootInitGlobal()
+  call s:InitializeGlobalSettings()
   call s:InitializeProjectBase()
 endfunction
 
