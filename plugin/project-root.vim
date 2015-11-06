@@ -187,12 +187,7 @@ function! s:GetProjectType()
   if &filetype =~ '\v^$'
     return 'unknown'
   endif
-  return s:NormalizeProjectType(&filetype)
-endfunction
-
-" Normalize a project type
-function! s:NormalizeProjectType(project_type)
-  return substitute(a:project_type, '\v(^\d|[^0-9a-zA-Z_])', '_', 'g')
+  return &filetype
 endfunction
 
 " }}}
