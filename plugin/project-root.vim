@@ -433,6 +433,15 @@ function! s:ProjectRootTest()
   endif
 endfunction
 
+function! s:ProjectRootTestFile()
+  let test_command = s:TestCommandFile()
+  if empty(test_command)
+    echo "No tests found"
+  else
+    exec '!cd ' . b:project_root_directory . ' && ' . test_command
+  endif
+endfunction
+
 function! s:ProjectRootOpenTest()
   let test_file = s:TestFileName()
   if empty(test_file) || empty(glob(test_file))
@@ -520,6 +529,7 @@ function! s:ProjectRootInitCommands()
   command! ProjectRootBrowseTests :call <SID>ProjectRootBrowseTests()
   command! ProjectRootBrowseSource :call <SID>ProjectRootBrowseSource()
   command! ProjectRootOpenTest :call <SID>ProjectRootOpenTest()
+  command! ProjectRootTestFile :call <SID>ProjectRootTestFile()
 endfunction
 
 " }}}

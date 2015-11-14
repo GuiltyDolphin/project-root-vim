@@ -210,6 +210,11 @@ Will attempt to run tests for the current project. See
 |project-root-test_command|.
 
 -----------------------------------------------------------------------
+                                                  *ProjectRootTestFile*
+Will run the tests for the current file.
+See |project-root-test_command_file| for the related attribute.
+
+-----------------------------------------------------------------------
 
 4.1. Browsing                                   *project-root-browsing*
 
