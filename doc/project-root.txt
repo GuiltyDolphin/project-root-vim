@@ -160,7 +160,14 @@ Thus running >
     let project_root_pt['ruby']['test_command'] = 'rake test'
 would allow project-root to run tests for appropriate ruby projects. >
 
---------
+-----------------
+test_command_file                      *project-root-test_command_file*
+
+A |Funcref| that should represent a function that can take a path to
+a test file and produce a string representing a command that will run
+the tests for the given file when used in the project's root directory.
+
+-------------
 test_file_gen                              *project-root-test_file_gen*
 
 A |Funcref| that should take the form >

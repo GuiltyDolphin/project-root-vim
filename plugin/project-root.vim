@@ -105,6 +105,24 @@ function! s:ProjectTestCommand()
   return ''
 endfunction
 
+" Get the test command for running tests for an individual file.
+function! s:TestCommandFile()
+  let with_tests = s:GetResolutionOrder(b:project_root_type, 'test_command_file')
+  let test_file = s:TestFileName()
+  if empty(test_file) || empty(glob(test_file))
+    return ''
+  endif
+  for parent in with_tests
+    let pdict = g:project_root_pt[parent]
+    let TestCommand = pdict.test_command_file
+    let tcommand = call(TestCommand, [test_file])
+    if !empty(tcommand)
+      return tcommand
+    endif
+  endfor
+  return ''
+endfunction
+
 " Get the path to the test file for the current file.
 function! s:TestFileName()
   let test_file_gens = s:GetResolutionOrder(
