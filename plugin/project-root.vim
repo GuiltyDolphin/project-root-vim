@@ -105,6 +105,29 @@ function! s:ProjectTestCommand()
   return ''
 endfunction
 
+" Get the path to the test file for the current file.
+function! s:TestFileName()
+  let test_file_gens = s:GetResolutionOrder(
+        \ b:project_root_type, 'test_file_gen')
+  for parent in test_file_gens
+    let pdict = g:project_root_pt[parent]
+    let TestGen = pdict.test_file_gen
+    let rel_root = s:FileRelativeToRoot()
+    let res = call(TestGen, [rel_root])
+    if !empty(res)
+      return s:SubRoot(res)
+    endif
+  endfor
+  return ''
+endfunction
+
+" Get the filepath for the current buffer relative to the project
+" root.
+function! s:FileRelativeToRoot()
+  return substitute(
+        \ expand("%:p"), b:project_root_directory, '', '')
+endfunction
+
 " }}}
 
 " Setup {{{
@@ -362,6 +385,16 @@ function! s:GetResolutionOrder(project_type, attr)
     call extend(inheritance_order, without_repeats)
   endfor
   return inheritance_order
+endfunction
+
+" }}}
+
+" Utility {{{
+
+" Create a path including a:path as a sub-path of the root
+" directory.
+function! s:SubRoot(path)
+  return simplify(b:project_root_directory . '/' . a:path)
 endfunction
 
 " }}}
