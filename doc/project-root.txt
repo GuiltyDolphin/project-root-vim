@@ -226,6 +226,11 @@ Browse the test directory for the current project. See
 Browse the source directory for the current project. See
 |project-root-source_globs|.
 
+-----------------------------------------------------------------------
+                                                  *ProjectRootOpenTest*
+Open the test file for the current buffer.
+See |project-root-test_file_gen| for the associated attribute.
+
 =======================================================================
 5. About                                           *project-root-about*
 

@@ -403,6 +403,8 @@ endfunction
 
 " Commands {{{
 
+" Testing {{{
+
 " Attempts to run tests for the current project.
 function! s:ProjectRootTest()
   let test_command = s:ProjectTestCommand()
@@ -412,6 +414,17 @@ function! s:ProjectRootTest()
     exec '!cd ' . b:project_root_directory . ' && ' . test_command
   endif
 endfunction
+
+function! s:ProjectRootOpenTest()
+  let test_file = s:TestFileName()
+  if empty(test_file) || empty(glob(test_file))
+    echo "Could not find test file"
+  else
+    exec 'split ' . test_file
+  endif
+endfunction
+
+" }}}
 
 " Browsing {{{
 
@@ -488,6 +501,7 @@ function! s:ProjectRootInitCommands()
   command! ProjectRootTest :call <SID>ProjectRootTest()
   command! ProjectRootBrowseTests :call <SID>ProjectRootBrowseTests()
   command! ProjectRootBrowseSource :call <SID>ProjectRootBrowseSource()
+  command! ProjectRootOpenTest :call <SID>ProjectRootOpenTest()
 endfunction
 
 " }}}
