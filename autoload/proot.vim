@@ -39,13 +39,11 @@ function! s:InitializeProjectType(project_type, ...)
   let additional_options = get(a:000, 0, {})
 
   let g:project_root_pt[a:project_type] = {}
-  " Don't inherit base if they told us not to!
-  if g:project_root_implicit_base == 0
-    let g:project_root_pt[a:project_type].inherits = []
-  else
-    let g:project_root_pt[a:project_type].inherits = ['base_project']
-  endif
   call extend(g:project_root_pt[a:project_type], additional_options)
+  " Inherit base unless the user says otherwise.
+  if g:project_root_implicit_base != 0
+    call s:ExtendDefault(a:project_type, 'inherits', ['base_project'])
+  endif
 endfunction
 
 function! proot#initialize_project(project_name, ...)
@@ -63,27 +61,48 @@ endfunction
 " higher precedence than the current parents, otherwise they
 " will have a lower precedence.
 function! proot#project_add_inherits(project_name, parents, ...)
-  let curr_parents = g:project_root_pt[a:project_name]['inherits']
-  if get(a:000, 0) == 0
-    call s:NubExtend(curr_parents, a:parents)
-  else
-    call s:NubExtend(curr_parents, a:parents, 0)
-  endif
+  call call('s:ExtendDefault', [a:project_name, 'inherits', a:parents, []] + a:000)
 endfunction
 
 " }}}
 
+" Lists {{{
+"
 " The same as Vim's 'extend' function, but will not add duplicate
 " elements.
 function! s:NubExtend(xs, ys, ...)
   let to_extend = []
-  for elt in a:ys
-    if index(a:xs, elt) == -1 && index(to_extend, elt) == -1
-      call add(to_extend, elt)
+  for Elt in a:ys
+    if index(a:xs, Elt) == -1 && index(to_extend, Elt) == -1
+      call add(to_extend, Elt)
     endif
   endfor
   call call('extend', [a:xs, to_extend] + a:000)
 endfunction
+
+" Extend a project list attribute.
+"
+" Arguments:
+" a:project_type - name of project to act upon
+" a:attr - name of attribute
+" a:ys - list to extend
+" Optional arguments:
+" a:1 - default value for list if it does not exist (defaults to [])
+" a:2 - position at which to extend the list (see Vim's extend() function)
+function! s:ExtendDefault(project_type, attr, ys, ...)
+  let pdict = g:project_root_pt[a:project_type]
+  let default = get(a:000, 0, [])
+  if !exists('pdict[a:attr]')
+    let pdict[a:attr] = default
+  endif
+  if a:0 > 1
+    call call('s:NubExtend', [pdict[a:attr], a:ys] + a:000[1:])
+  else
+    call call('s:NubExtend', [pdict[a:attr], a:ys])
+  endif
+endfunction
+
+" }}}
 
 " }}}
 
