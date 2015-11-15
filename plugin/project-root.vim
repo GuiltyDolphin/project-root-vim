@@ -253,9 +253,6 @@ endfunction
 " Set the project type for the current buffer if it hasn't already
 " been set.
 function! s:SetProjectType()
-  if exists('b:project_root_type')
-    return
-  endif
   let b:project_root_type = s:GetProjectType()
   call proot#initialize_project(b:project_root_type)
 endfunction
@@ -275,6 +272,13 @@ function! s:InitializeBuffer()
   call s:SetProjectType()
   call s:SetProjectRootDirectory()
   return 1
+endfunction
+
+function! s:InitializeBufferLate()
+  if exists('b:project_root_type')
+    return
+  endif
+  call s:InitializeBuffer()
 endfunction
 
 " }}}
@@ -565,7 +569,8 @@ call <SID>ProjectRootInitCommands()
 
 augroup ProjectRootInit
   au!
-  au BufRead,BufNewFile * call <SID>InitializeBuffer()
+  au FileType * call <SID>InitializeBuffer()
+  au BufRead,BufNewFile * call <SID>InitializeBufferLate()
 augroup END
 
 " }}}
