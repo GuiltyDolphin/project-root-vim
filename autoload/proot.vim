@@ -79,6 +79,17 @@ function! proot#add_project_runners(project_type, runners, ...)
   call call('s:ExtendDefault', [a:project_type, 'runners', a:runners, []] + a:000)
 endfunction
 
+" Change the project type to that given and perform initialization.
+function! proot#set_project_type(project_type)
+  call s:InitializeProjectType(a:project_type)
+  let b:project_root_type = a:project_type
+  let pdict = g:project_root_pt[a:project_type]
+  let runners = get(pdict, 'runners', [])
+  for Runner in runners
+    call call(Runner, [])
+  endfor
+endfunction
+
 " }}}
 
 " Lists {{{

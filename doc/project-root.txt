@@ -99,6 +99,13 @@ project-root will try and guess the project type based on the filetype
 of the current buffer. If this isn't what you want, then set it
 yourself in your .vimrc.
 
+                                               *proot#set_project_type*
+
+Use proot#set_project_type({project-type}) to change the current
+project type. This should be favored over using a `:let` command
+as it performs initialization which other project configurations may
+rely on.
+
 =======================================================================
 3. Project configuration                  *project-root-project-config*
 
@@ -190,6 +197,10 @@ Would set the attribute to the correct function reference. >
 runners                                          *project-root-runners*
 
 A list of |FuncRef|s that are run when the project type is set.
+
+Note that using a `:let` command to set the project type will not
+cause the functions in runners to be run.
+Use |proot#set_project_type| instead.
 
                                             *proot#add_project_runners*
 
