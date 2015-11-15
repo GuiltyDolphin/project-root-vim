@@ -186,6 +186,16 @@ Then using >
       \ function('s:ProjectRootTestFile')
 Would set the attribute to the correct function reference. >
 
+-------
+runners                                          *project-root-runners*
+
+A list of |FuncRef|s that are run when the project type is set.
+
+                                            *proot#add_project_runners*
+
+proot#add_project_runners({project-type}, {runners}, [, {higher}])
+can be used to add runners to the given project.
+
 --------
 inherits                                        *project-root-inherits*
 

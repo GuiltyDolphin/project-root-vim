@@ -39,6 +39,14 @@ function! s:InitializeProjectBase()
   endif
 endfunction
 
+function! s:RunProjectRunners()
+  let pdict = g:project_root_pt[b:project_root_type]
+  let runners = get(pdict, 'runners', [])
+  for Runner in runners
+    call call(Runner, [])
+  endfor
+endfunction
+
 " }}}
 
 " Searching for file patterns {{{
@@ -269,8 +277,14 @@ endfunction
 
 " Initialize project root for the current buffer.
 function! s:InitializeBuffer()
+  let old_pt = exists('b:project_root_type')
+        \ ? b:project_root_type : ''
   call s:SetProjectType()
   call s:SetProjectRootDirectory()
+  " Only run project runners if project type has changed.
+  if old_pt != b:project_root_type
+    call s:RunProjectRunners()
+  endif
   return 1
 endfunction
 

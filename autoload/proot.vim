@@ -64,6 +64,21 @@ function! proot#project_add_inherits(project_name, parents, ...)
   call call('s:ExtendDefault', [a:project_name, 'inherits', a:parents, []] + a:000)
 endfunction
 
+" Allows specifying a function that will run when the project type
+" has been set.
+"
+" Arguments:
+" a:project_type - name of project to update.
+" a:runners - list of functions to add to the runners.
+"
+" Optional arguments:
+" a:1 (default 0) - When nonzero, the new parents will have a
+" higher precedence than the current parents, otherwise they
+" will have a lower precedence.
+function! proot#add_project_runners(project_type, runners, ...)
+  call call('s:ExtendDefault', [a:project_type, 'runners', a:runners, []] + a:000)
+endfunction
+
 " }}}
 
 " Lists {{{
