@@ -477,8 +477,8 @@ endfunction
 
 " Open a directory browser for the given directory.
 function! s:ProjectRootBrowse(dir)
-  if exists(':NERDTreeToggle')
-    exec 'NERDTreeToggle ' . a:dir
+  if exists(':NERDTree')
+    exec 'NERDTree ' . a:dir
   elseif exists(':Sexplore')
     exec 'Sexplore ' . a:dir
   else
