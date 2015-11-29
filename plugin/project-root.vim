@@ -423,6 +423,34 @@ function! s:GetResolutionOrder(project_type, attr)
   return inheritance_order
 endfunction
 
+" Get the first value of the given attribute defined in the inheritance
+" tree.
+"
+" If defined, a:1 should represent a predicate function that will
+" perform an additional check on the value of the attribute.
+function! s:ResolveFirst(project_type, attr, ...)
+  let CheckFun = get(a:000, 0)
+  let parents = s:GetResolutionOrder(a:project_type, a:attr)
+  if CheckFun == 0
+    if len(parents) != 0
+      let parent = get(parents, 0)
+      return get(g:project_root_pt[parent], a:attr)
+    endif
+    return
+  endif
+  for parent in parents
+    let pdict = g:project_root_pt[a:parent]
+    if call("CheckFun", pdict[a:attr])
+      return pdict[a:attr]
+    endif
+  endfor
+endfunction
+
+" Like s:ResolveFirst, but implicity act upon the current project type.
+function! s:ResolveFirstC(attr, ...)
+  return call('s:ResolveFirst', [b:project_root_type, a:attr] + a:000)
+endfunction
+
 " }}}
 
 " Utility {{{
@@ -430,7 +458,38 @@ endfunction
 " Create a path including a:path as a sub-path of the root
 " directory.
 function! s:SubRoot(path)
-  return simplify(b:project_root_directory . '/' . a:path)
+  return s:JoinPaths(b:project_root_directory, a:path)
+endfunction
+
+" Strip the project root directory from a path.
+function! s:StripRoot(path)
+  return substitute(a:path, '\V' . b:project_root_directory . '/\?', '', '')
+endfunction
+
+" Create one longer path from many smaller paths.
+function! s:JoinPaths(...)
+  return simplify(join(a:000, '/'))
+endfunction
+
+" Execute the given command in the project's root directory.
+"
+" Optional arguments:
+" a:1 - if nonzero will display the result of the command to the user.
+"   otherwise will return the result of executing the command.
+function! s:ExecInRoot(cmd, ...)
+  let response = get(a:000, 0)
+  if response
+    exec '!cd ' . b:project_root_directory . ' && ' . a:cmd
+  else
+    return system('cd ' . b:project_root_directory . ' && ' . a:cmd)
+  endif
+endfunction
+
+" Split a path into the head and tail.
+function! s:SplitTail(path)
+  let head = fnamemodify(a:path, ':h')
+  let tail = fnamemodify(a:path, ':t')
+  return [head, tail]
 endfunction
 
 " }}}
@@ -447,7 +506,7 @@ function! s:ProjectRootTest()
   if empty(test_command)
     echo "No tests found"
   else
-    exec '!cd ' . b:project_root_directory . ' && ' . test_command
+    call s:ExecInRoot(test_command, 1)
   endif
 endfunction
 
@@ -456,7 +515,7 @@ function! s:ProjectRootTestFile()
   if empty(test_command)
     echo "No tests found"
   else
-    exec '!cd ' . b:project_root_directory . ' && ' . test_command
+    call s:ExecInRoot(test_command, 1)
   endif
 endfunction
 
