@@ -523,8 +523,24 @@ function! s:ProjectRootOpenTest()
   let test_file = s:TestFileName()
   if empty(test_file) || empty(glob(test_file))
     echo "Could not find test file"
+    if s:ResolveFirstC('prompt_create')
+      let rel_path = s:StripRoot(test_file)
+      call call('s:CreateMissing', s:SplitTail(rel_path))
+    endif
   else
     exec 'split ' . test_file
+  endif
+endfunction
+
+" Prompt the user on whether to create a particular file.
+function! s:CreateMissing(path, fname)
+  let full_path = s:JoinPaths(a:path, a:fname)
+  let should_make = confirm("Create file: " . full_path . " ?", "&No\n&Yes")
+  if should_make == 2
+    call mkdir(s:SubRoot(a:path), 'p')
+    if !empty(a:fname)
+      call s:ExecInRoot('touch ' . full_path)
+    endif
   endif
 endfunction
 

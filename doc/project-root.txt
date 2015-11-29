@@ -222,6 +222,12 @@ If {higher} is specified, and is non-zero, then the new parents will be
 given higher precedence than the old parents, otherwise they will be
 given lower precedence.
 
+-------------
+prompt_create                              *project-root-prompt_create*
+
+When nonzero, commands that attempt to open files will display a
+prompt to create the file if it is missing.
+
 =======================================================================
 4. Commands                                     *project-root-commands*
 
