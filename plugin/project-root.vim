@@ -117,7 +117,7 @@ endfunction
 function! s:TestCommandFile()
   let with_tests = s:GetResolutionOrder(b:project_root_type, 'test_command_file')
   let test_file = s:TestFileName()
-  if empty(test_file) || empty(glob(test_file))
+  if empty(test_file)
     return ''
   endif
   for parent in with_tests
