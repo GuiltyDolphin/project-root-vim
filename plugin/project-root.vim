@@ -141,7 +141,7 @@ function! s:TestFileName()
     let rel_root = s:FileRelativeToRoot()
     let res = call(TestGen, [rel_root])
     if !empty(res)
-      return s:SubRoot(res)
+      return res
     endif
   endfor
   return ''
