@@ -6,7 +6,7 @@
 
 " Before {{{
 
-if exists("g:loaded_project_root") || &cp
+if exists('g:loaded_project_root') || &cp
   finish
 endif
 let g:loaded_project_root = 1
@@ -23,10 +23,10 @@ let g:loaded_project_root = 1
 " dictionary.
 function! s:InitializeProjectBase()
   " The base dictionary for project configuration.
-  if !exists("g:project_root_pt")
+  if !exists('g:project_root_pt')
     let g:project_root_pt = {}
   endif
-  if !exists("g:project_root_pt.base_project")
+  if !exists('g:project_root_pt.base_project')
     " Base project type for implicit inheritance.
     let g:project_root_pt.base_project =
           \ { 'root_globs': ['.git', s:GlobIgnoreCase('licen{s,c}e'),
@@ -67,9 +67,9 @@ function! s:ProjectGlobDown(attr, ...)
       continue
     endif
     let prefer_search = s:PreferredSearchMethod(parent)
-    if prefer_search =~ '\cfirst'
+    if prefer_search =~# 'first'
       let res = s:ProjectGlobDownFirst(globs, start_dir, ftype)
-    elseif prefer_search =~ '\cpriority'
+    elseif prefer_search =~# 'priority'
       let res = s:ProjectGlobDownPriority(globs, start_dir, ftype)
     endif
     if res != []
@@ -151,7 +151,7 @@ endfunction
 " root.
 function! s:FileRelativeToRoot()
   return substitute(
-        \ expand("%:p"), b:project_root_directory, '', '')
+        \ expand('%:p'), b:project_root_directory, '', '')
 endfunction
 
 " }}}
@@ -178,9 +178,9 @@ endfunction
 " If no project directory can be found then the current directory
 " is returned instead.
 function! s:GetProjectRootDirectory()
-  if g:project_root_search_method == 'priority'
+  if g:project_root_search_method ==# 'priority'
     return s:GetProjectRootDirectoryPriority()
-  elseif g:project_root_search_method == 'first'
+  elseif g:project_root_search_method ==# 'first'
     return s:GetProjectRootDirectoryFirst()
   endif
 endfunction
@@ -200,17 +200,17 @@ endfunction
 " d is the depth of the current directory relative to the root
 " directory ('/').
 function! s:GetProjectRootDirectoryFirst(...)
-  let current_directory = expand("%:p:h")
+  let current_directory = expand('%:p:h')
   let project_type = get(a:000, 0, b:project_root_type)
   let res_order = s:GetResolutionOrder(project_type, 'root_globs')
   for parent in res_order
     let curr_dict = g:project_root_pt[parent]
     let curr_globs = s:ListToGlob(curr_dict.root_globs)
-    if curr_globs =~ '\v^$'
+    if curr_globs =~# '\v^$'
       continue
     endif
     let res = s:GlobUpDir(curr_globs, current_directory)
-    if res !~ '\v^$'
+    if res !~# '\v^$'
       return res
     endif
   endfor
@@ -239,14 +239,14 @@ endfunction
 " a:1 - The project type for which the globs should be used.
 "       Defaults to the current project type.
 function! s:GetProjectRootDirectoryPriority(...)
-  let current_directory = expand("%:p:h")
+  let current_directory = expand('%:p:h')
   let project_type = get(a:000, 0, b:project_root_type)
   let res_order = s:GetResolutionOrder(project_type, 'root_globs')
   for parent in res_order
     let globs = g:project_root_pt[parent].root_globs
     for glb in globs
       let res = s:GlobUpDir(glb, current_directory)
-      if res !~ '\v^$'
+      if res !~# '\v^$'
         return res
       endif
     endfor
@@ -267,7 +267,7 @@ endfunction
 
 " Determine the current project type.
 function! s:GetProjectType()
-  if &filetype =~ '\v^$'
+  if &filetype =~# '\v^$'
     return 'unknown'
   endif
   return &filetype
@@ -346,34 +346,34 @@ endfunction
 " Note that 'first result' refers to the first set of matches in a
 " single directory - this may contain several individual matches.
 function! s:GlobUp(pattern, start_path)
-  let curr_dir = fnamemodify(a:start_path, ":p:h")
+  let curr_dir = fnamemodify(a:start_path, ':p:h')
   while 1
     let curr_res = globpath(curr_dir, a:pattern)
-    if curr_res !~ '\v^$'
+    if curr_res !~# '\v^$'
       return curr_res
     endif
     " When the base-most path has been checked.
-    if curr_dir =~ '\v^[./]$'
+    if curr_dir =~# '\v^[./]$'
       return ''
     endif
-    let curr_dir = fnamemodify(curr_dir, ":h")
+    let curr_dir = fnamemodify(curr_dir, ':h')
   endwhile
 endfunction
 
 " The same as *GlobUp*, but will return the first directory
 " containing the match, rather than all the matches.
 function! s:GlobUpDir(pattern, start_directory)
-  let curr_dir = fnamemodify(a:start_directory, ":p")
+  let curr_dir = fnamemodify(a:start_directory, ':p')
   while 1
     let curr_res = globpath(curr_dir, a:pattern)
-    if curr_res !~ '\v^$'
+    if curr_res !~# '\v^$'
       return curr_dir
     endif
     " When the base-most path has been checked.
-    if curr_dir =~ '\v^[./]$'
+    if curr_dir =~# '\v^[./]$'
       return ''
     endif
-    let curr_dir = fnamemodify(curr_dir, ":h")
+    let curr_dir = fnamemodify(curr_dir, ':h')
   endwhile
 endfunction
 
@@ -390,7 +390,7 @@ function! s:FindDown(start_directory, name, ...)
   endif
   let search_names = join(expand(a:name, 0, 1), "' -o -name '")
   return systemlist(
-        \ "find " . a:start_directory
+        \ 'find ' . a:start_directory
         \ . " -name '" . search_names . "'"
         \ . fstr)
 endfunction
@@ -439,8 +439,8 @@ function! s:ResolveFirst(project_type, attr, ...)
     return
   endif
   for parent in parents
-    let pdict = g:project_root_pt[a:parent]
-    if call("CheckFun", pdict[a:attr])
+    let pdict = g:project_root_pt[parent]
+    if call('CheckFun', pdict[a:attr])
       return pdict[a:attr]
     endif
   endfor
@@ -517,7 +517,7 @@ endfunction
 function! s:ProjectRootTest()
   let test_command = s:ProjectTestCommand()
   if empty(test_command)
-    echo "No tests found"
+    echo 'No tests found'
   else
     call s:ExecInRoot(test_command, 1)
   endif
@@ -526,7 +526,7 @@ endfunction
 function! s:ProjectRootTestFile()
   let test_command = s:TestCommandFile()
   if empty(test_command)
-    echo "No tests found"
+    echo 'No tests found'
   else
     call s:ExecInRoot(test_command, 1)
   endif
@@ -535,7 +535,7 @@ endfunction
 function! s:ProjectRootOpenTest()
   let test_file = s:TestFileName()
   if empty(test_file) || empty(glob(test_file))
-    echo "Could not find test file"
+    echo 'Could not find test file'
     if s:ResolveFirstC('prompt_create')
       let rel_path = s:StripRoot(test_file)
       call call('s:CreateMissing', s:SplitTail(rel_path))
@@ -596,8 +596,8 @@ endfunction
 
 function! s:ProjectRootBrowseTests()
   let test_dir = s:ProjectRootGetTestDir()
-  if test_dir =~ '\v^$'
-    echo "No test directory found"
+  if test_dir =~# '\v^$'
+    echo 'No test directory found'
     return
   endif
   call s:ProjectRootBrowse(test_dir)
@@ -613,8 +613,8 @@ endfunction
 
 function! s:ProjectRootBrowseSource()
   let source_dir = s:ProjectRootGetSourceDir()
-  if source_dir =~ '\v^$'
-    echo "No source directory found"
+  if source_dir =~# '\v^$'
+    echo 'No source directory found'
     return
   endif
   call s:ProjectRootBrowse(source_dir)
