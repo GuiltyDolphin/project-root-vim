@@ -492,6 +492,19 @@ function! s:SplitTail(path)
   return [head, tail]
 endfunction
 
+" Create a file (or update timestamp if existing) relative to the
+" root directory.
+function! s:CreateFileRelativeToRoot(fpath)
+  let parent_dir = s:SubRoot(fnamemodify(a:fpath, ':h'))
+  let fname = fnamemodify(a:fpath, ':t')
+  if empty(finddir(parent_dir))
+    call mkdir(s:SubRoot(parent_dir), 'p')
+  endif
+  if !empty(fname)
+    call s:ExecInRoot('touch ' . a:fpath)
+  endif
+endfunction
+
 " }}}
 
 " }}}
@@ -535,12 +548,9 @@ endfunction
 " Prompt the user on whether to create a particular file.
 function! s:CreateMissing(path, fname)
   let full_path = s:JoinPaths(a:path, a:fname)
-  let should_make = confirm("Create file: " . full_path . " ?", "&No\n&Yes")
+  let should_make = confirm('Create file: ' . full_path . ' ?', "&No\n&Yes")
   if should_make == 2
-    call mkdir(s:SubRoot(a:path), 'p')
-    if !empty(a:fname)
-      call s:ExecInRoot('touch ' . full_path)
-    endif
+    call s:CreateFileRelativeToRoot(full_path)
   endif
 endfunction
 
