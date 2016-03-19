@@ -479,9 +479,9 @@ endfunction
 function! s:ExecInRoot(cmd, ...)
   let response = get(a:000, 0)
   if response
-    exec '!cd ' . b:project_root_directory . ' && ' . a:cmd
+    exec '!cd ' . b:project_root_directory . ' && (' . a:cmd . ')'
   else
-    return system('cd ' . b:project_root_directory . ' && ' . a:cmd)
+    return system('cd ' . b:project_root_directory . ' && (' . a:cmd . ')')
   endif
 endfunction
 
